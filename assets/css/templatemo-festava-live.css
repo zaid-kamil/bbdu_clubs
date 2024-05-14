@@ -644,7 +644,7 @@ strong {
   SCHEDULE              
 -----------------------------------------*/
 .schedule-section {
-  background-image: url('../images/nainoa-shizuru-unsplash-blur.jpg');
+  background-image: url('/static/images/nainoa-shizuru-unsplash-blur.jpg');
   background-color: #242424;
   background-repeat: no-repeat;
   background-position: center;
@@ -829,7 +829,7 @@ strong {
 
 .site-footer-top {
   background-color: var(--secondary-color);
-  background-image: url('../images/nainoa-shizuru-NcdG9mK3PBY-unsplash.jpg');
+  background-image: url('/static/images/nainoa-shizuru-unsplash-blur.jpg');
   background-repeat: no-repeat;
   margin-bottom: 70px;
   padding-top: 30px;

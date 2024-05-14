@@ -37,11 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'clubs'
+    'django.contrib.humanize',
+    'clubs',
     # 3rd party
     "crispy_forms",
     "crispy_bootstrap5",
-    "humanize",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

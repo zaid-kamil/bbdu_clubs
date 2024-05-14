@@ -9,7 +9,7 @@ class Event(models.Model):
     time = models.TimeField()
     venue = models.CharField(max_length=100)
     club = models.ForeignKey('Club', on_delete=models.CASCADE)
-    attendees = models.ManyToManyField(User, related_name='attendees')
+    attendees = models.ManyToManyField(User, related_name='attendees', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -28,7 +28,7 @@ class Discussion(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     club = models.ForeignKey('Club', on_delete=models.CASCADE)
-    members = models.ManyToManyField(User, related_name='members')
+    members = models.ManyToManyField(User, related_name='members', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -56,10 +56,10 @@ class Club(models.Model):
     image = models.ImageField(upload_to='club_images/')
     description = models.TextField()
     leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='leader', null=True, blank=True)
-    members = models.ManyToManyField(User, related_name='members')
-    events = models.ManyToManyField('Event', related_name='events')
-    announcements = models.ManyToManyField('Announcement', related_name='announcements')
-    discussions = models.ManyToManyField('Discussion', related_name='discussions')
+    members = models.ManyToManyField(User, related_name='clubmembers', null=True, blank=True)
+    events = models.ManyToManyField('Event', related_name='events', null=True, blank=True)
+    announcements = models.ManyToManyField('Announcement', related_name='announcements', null=True, blank=True)
+    discussions = models.ManyToManyField('Discussion', related_name='discussions', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -96,6 +96,10 @@ class MemberProfile(models.Model):
     pincode = models.CharField(max_length=6)
     dob = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
+    college = models.CharField(max_length=100)
+    semester = models.CharField(max_length=100)
+    rollno = models.CharField(max_length=100)
+    interest = models.CharField(max_length=100)
     
     def __str__(self):
         return self.name

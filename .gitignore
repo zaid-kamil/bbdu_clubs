@@ -6,8 +6,3 @@
 *.bak
 *.cache
 *.out
-
-clubs/__pycache__/admin.cpython-312.pyc
-clubs/__pycache__/models.cpython-312.pyc
-config/__pycache__/settings.cpython-312.pyc
-config/__pycache__/urls.cpython-312.pyc

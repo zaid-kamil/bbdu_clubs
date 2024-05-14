@@ -6,32 +6,35 @@ from django.contrib import messages
 
 from .models import Club, Event, Announcement, Discussion, Topic, Comment, LeaderProfile, MemberProfile, Faq, Contact
 from .forms import ClubForm, EventForm, AnnouncementForm, DiscussionForm, TopicForm, CommentForm, LeaderProfileForm, MemberProfileForm, FaqForm, ContactForm
-
+from .forms import LeaderLoginForm, MemberLoginForm, LeaderRegistrationForm, MemberRegistrationForm
 from datetime import datetime
 # Create your views here.
 
 def member_login(request):
+    form = MemberLoginForm()
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        if not User.objects.filter(username=username).exists():
-            messages.error(request, 'Invalid credentials')
-            return redirect('login')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            if not user.groups.filter(name='member').exists():
-                messages.error(request, 'You are not a member')
-                return redirect('login')
-            if not user.is_active:
-                messages.error(request, 'Your account is not activated yet')
-                return redirect('login')
-            login(request, user)
-            request.session['type'] = 'member'
-            return redirect('member_profile')
-        else:
-            messages.error(request, 'Invalid credentials')
-            return redirect('login')
-    return render(request, 'member_login.html')
+        form = MemberLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            if not User.objects.filter(username=username).exists():
+                messages.error(request, 'Invalid credentials')
+                return redirect('member_login')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                if not user.groups.filter(name='member').exists():
+                    messages.error(request, 'You are not a member')
+                    return redirect('member_login')
+                if not user.is_active:
+                    messages.error(request, 'Your account is not activated yet')
+                    return redirect('member_login')
+                login(request, user)
+                request.session['type'] = 'member'
+                return redirect('member_profile')
+            else:
+                messages.error(request, 'Invalid credentials')
+                return redirect('member_login')
+    return render(request, 'member_login.html', {'form': form})
 
 def member_register(request):
     info = None
@@ -40,6 +43,20 @@ def member_register(request):
         email = request.POST['email']
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
+        name = request.POST['name']
+        phone = request.POST['phone']
+        address = request.POST['address']
+        course = request.POST['course']
+        semester = request.POST['semester']
+        rollno = request.POST['rollno']
+        interest = request.POST['interest']
+        city = request.POST['city']
+        state = request.POST['state']
+        address = request.POST['address']
+        country = request.POST['country']
+        pincode = request.POST['pincode']
+        dob = request.POST['dob']
+        image = request.FILES['image']
         if User.objects.filter(username=username).exists():
             messages.error(request, 'Username is already taken')
             return redirect('register')
@@ -60,54 +77,88 @@ def member_register(request):
         group, created = Group.objects.get_or_create(name='member')
         if created:
             group.save()
-        group.user_set.add(user)
+        group.user_set.add(user
+        # create member profile
+        profile = MemberProfile(user=user, name=name, email=email, phone=phone, address=address, course=course, semester=semester, rollno=rollno, interest=interest, city=city, state=state, country=country, pincode=pincode, dob=dob, image=image)
+        profile.save()
 
         messages.success(request, 'Account created successfully')
         info = "Your account has been created successfully. Your account will be activated by the admin. You will be notified via email."
     return render(request, 'member_register.html', {'info': info})
 
 def leader_login(request):
+    form = LeaderLoginForm()
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        if not User.objects.filter(username=username).exists():
-            messages.error(request, 'Invalid credentials')
-            return redirect('leader_login')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            if not user.groups.filter(name='leader').exists():
-                messages.error(request, 'You are not a leader')
+        form = LeaderLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            if not User.objects.filter(username=username).exists():
+                messages.error(request, 'Invalid credentials')
                 return redirect('leader_login')
-            if not user.is_active:
-                messages.error(request, 'Your account is not activated yet')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                if not user.groups.filter(name='leader').exists():
+                    messages.error(request, 'You are not a leader')
+                    return redirect('leader_login')
+                if not user.is_active:
+                    messages.error(request, 'Your account is not activated yet')
+                    return redirect('leader_login')
+                login(request, user)
+                request.session['type'] = 'leader'
+                return redirect('leader_profile')
+            else:
+                messages.error(request, 'Invalid credentials')
                 return redirect('leader_login')
-            login(request, user)
-            request.session['type'] = 'leader'
-            return redirect('leader_profile')
-        else:
-            messages.error(request, 'Invalid credentials')
-            return redirect('leader_login')
-    return render(request, 'leader_login.html')
+    return render(request, 'leader_login.html', {'form': form})
 
 def leader_register(request):
     info = None
+    form = LeaderRegistrationForm()
     if request.method == 'POST':
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'Username is already taken')
-            return redirect('register')
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Email is already taken')
-            return redirect('register')
-        if len(password) < 6:
-            messages.error(request, 'Password must be at least 6 characters')
-            return redirect('register')
-        if password != confirm_password:
-            messages.error(request, 'Passwords do not match')
-            return redirect('register')
+        form = LeaderRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            confirm_password = form.cleaned_data['confirm_password']
+            name = form.cleaned_data['name']
+            phone = form.cleaned_data['phone']
+            address = form.cleaned_data['address']
+            city = form.cleaned_data['city']
+            state = form.cleaned_data['state']
+            country = form.cleaned_data['country']
+            pincode = form.cleaned_data['pincode']
+            dob = form.cleaned_data['dob']
+            image = form.cleaned_data['image']
+            
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'Username is already taken')
+                return redirect('leader_register')
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'Email is already taken')
+                return redirect('leader_register')
+            if len(password) < 6:
+                messages.error(request, 'Password must be at least 6 characters')
+                return redirect('leader_register')
+            if password != confirm_password:
+                messages.error(request, 'Passwords do not match')
+                return redirect('leader_register')
+            
+            user = User.objects.create_user(username=username, email=email, password=password)
+            user.is_active = False
+            user.save()
+            # create group if not exists
+            group, created = Group.objects.get_or_create(name='leader')
+            if created:
+                group.save()
+            group.user_set.add(user)
+            profile = form.save(commit=False)
+            profile.user = user
+            profile.save()
+
+            messages.success(request, 'Account created successfully')
+            info = "Your account has been created successfully. Your account will be activated by the admin. You will be notified via email."
         
         user = User.objects.create_user(username=username, email=email, password=password)
         user.is_active = False
@@ -120,7 +171,7 @@ def leader_register(request):
 
         messages.success(request, 'Account created successfully')
         info = "Your account has been created successfully. Your account will be activated by the admin. You will be notified via email."
-    return render(request, 'leader_register.html', {'info': info})
+    return render(request, 'leader_register.html', {'info': info, 'form': form})
 
 def logout_view(request):
     request.session.flush()
@@ -610,10 +661,20 @@ def edit_comment(request, cid):
             comment.save()
             messages.success(request, 'Comment updated successfully')
     return redirect('detail_topic', topic.id)
+
+def remove_comment(request):
+    if request.session['type'] != 'member':
+        return redirect('login')
+    user = request.user
+    comment_id = request.GET['comment_id']
+    comment = get_object_or_404(Comment, pk=comment_id)
+    comment.delete()
+    messages.success(request, 'Comment removed successfully')
+    return redirect('detail_topic', comment.topic.id)
         
 def home(request):
     clubs = Club.objects.all()
-    return render(request, 'home.html', {'clubs': clubs})
+    return render(request, 'index.html', {'clubs': clubs})
 
 
 
