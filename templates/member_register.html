@@ -4,13 +4,21 @@
 {% load crispy_forms_tags %}
 {% block title %}{% endblock title %}
 {% block head %}{% endblock %}
-{% block css %}{% endblock %}
+{% block css %}
+<style>
+    .main-section {
+        background-image: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 131, 131, 0.5)),
+    }
+    
+</style>
+{% endblock %}
 {% block content %}
-<section class="contact-section section-padding bg-dark " id="section_6">
+
+<section class="main-section section-padding bg-dark ">
     <div class="container">
         <div class="row">
 
-            <div class="col-lg-8 col-12 mx-auto">
+            <div class="col-lg-6 col-12 mx-auto">
                 <h2 class="text-center mb-4 text-light">Regsiter to BBDU clubs</h2>
 
                 <nav class="d-flex justify-content-center">
@@ -32,12 +40,12 @@
 
                         {% endif %}
 
-                        <form class="custom-form contact-form mb-5 mb-lg-0" method="post" role="form">
+                        <form class="custom-form contact-form mb-5 mb-lg-0" method="post" role="form" enctype="multipart/form-data">
                             <div class="contact-form-body">
                                 {% csrf_token %}
                                 {{form|crispy}}
                                 <div class="col-lg-4 col-md-10 col-8 mx-auto">
-                                    <button type="submit" class="form-control">Continue</button>
+                                    <button type="submit" class="form-control">Register</button>
                                 </div>
                             </div>
                         </form>
@@ -52,4 +60,7 @@
     </div>
 </section>
 {% endblock %}
-{% block js %}{% endblock %}
+{% block js %}
+
+
+{% endblock %}

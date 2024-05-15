@@ -4,11 +4,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .models import Club, Event, Announcement, Discussion, Topic, Comment, LeaderProfile, MemberProfile, Faq, Contact
+from .models import Club, Event, Announcement, Discussion, Topic, Comment, LeaderProfile, MemberProfile, Faq, Contact, ClubApplication
 from .forms import ClubForm, EventForm, AnnouncementForm, DiscussionForm, TopicForm, CommentForm, LeaderProfileForm, MemberProfileForm, FaqForm, ContactForm
 from .forms import LeaderLoginForm, MemberLoginForm, LeaderRegistrationForm, MemberRegistrationForm
 from datetime import datetime
 # Create your views here.
+
+
 
 def member_login(request):
     form = MemberLoginForm()
@@ -19,72 +21,93 @@ def member_login(request):
             password = form.cleaned_data['password']
             if not User.objects.filter(username=username).exists():
                 messages.error(request, 'Invalid credentials')
-                return redirect('member_login')
+                return redirect('login')
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 if not user.groups.filter(name='member').exists():
                     messages.error(request, 'You are not a member')
-                    return redirect('member_login')
+                    return redirect('login')
                 if not user.is_active:
                     messages.error(request, 'Your account is not activated yet')
-                    return redirect('member_login')
+                    return redirect('login')
                 login(request, user)
                 request.session['type'] = 'member'
+                request.session['is_member'] = True
                 return redirect('member_profile')
             else:
                 messages.error(request, 'Invalid credentials')
-                return redirect('member_login')
+                return redirect('login')
     return render(request, 'member_login.html', {'form': form})
 
 def member_register(request):
     info = None
+    form = MemberRegistrationForm()
     if request.method == 'POST':
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
-        name = request.POST['name']
-        phone = request.POST['phone']
-        address = request.POST['address']
-        course = request.POST['course']
-        semester = request.POST['semester']
-        rollno = request.POST['rollno']
-        interest = request.POST['interest']
-        city = request.POST['city']
-        state = request.POST['state']
-        address = request.POST['address']
-        country = request.POST['country']
-        pincode = request.POST['pincode']
-        dob = request.POST['dob']
-        image = request.FILES['image']
-        if User.objects.filter(username=username).exists():
-            messages.error(request, 'Username is already taken')
-            return redirect('register')
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Email is already taken')
-            return redirect('register')
-        if len(password) < 6:
-            messages.error(request, 'Password must be at least 6 characters')
-            return redirect('register')
-        if password != confirm_password:
-            messages.error(request, 'Passwords do not match')
-            return redirect('register')
-        
-        user = User.objects.create_user(username=username, email=email, password=password)
-        user.is_active = False
-        user.save()
-        # create group if not exists
-        group, created = Group.objects.get_or_create(name='member')
-        if created:
-            group.save()
-        group.user_set.add(user
-        # create member profile
-        profile = MemberProfile(user=user, name=name, email=email, phone=phone, address=address, course=course, semester=semester, rollno=rollno, interest=interest, city=city, state=state, country=country, pincode=pincode, dob=dob, image=image)
-        profile.save()
+        form = MemberRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            username = request.POST['username']
+            email = request.POST['email']
+            password = request.POST['password']
+            confirm_password = request.POST['confirm_password']
+            name = request.POST['name']
+            phone = request.POST['phone']
+            address = request.POST['address']
+            course = request.POST['course']
+            semester = request.POST['semester']
+            rollno = request.POST['rollno']
+            interest = request.POST['interest']
+            city = request.POST['city']
+            state = request.POST['state']
+            address = request.POST['address']
+            country = request.POST['country']
+            pincode = request.POST['pincode']
+            dob = request.POST['dob']
+            image = request.FILES['image']
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'Username is already taken')
+                return redirect('register')
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'Email is already taken')
+                return redirect('register')
+            if len(password) < 6:
+                messages.error(request, 'Password must be at least 6 characters')
+                return redirect('register')
+            if password != confirm_password:
+                messages.error(request, 'Passwords do not match')
+                return redirect('register')
+            
+            user = User.objects.create_user(username=username, email=email, password=password)
+            user.is_active = False
+            user.save()
+            # create group if not exists
+            group, created = Group.objects.get_or_create(name='member')
+            if created:
+                group.save()
+            group.user_set.add(user)
+            # create member profile
+            dob = datetime.strptime(dob, '%d/%m/%Y').strftime('%Y-%m-%d')
+            print(dob)
+            profile = MemberProfile(user=user, 
+                                    image=image,
+                                    name=name, 
+                                    email=email, 
+                                    phone=phone, 
+                                    address=address, 
+                                    city=city, 
+                                    state=state, 
+                                    country=country, 
+                                    pincode=pincode, 
+                                    dob=dob, 
+                                    course=course, 
+                                    semester=semester, 
+                                    rollno=rollno, 
+                                    interest=interest, 
+                                    )
+            profile.save()
 
-        messages.success(request, 'Account created successfully')
-        info = "Your account has been created successfully. Your account will be activated by the admin. You will be notified via email."
-    return render(request, 'member_register.html', {'info': info})
+            messages.success(request, 'Account created successfully')
+            info = "Your account has been created successfully. Your account will be activated by the admin. You will be notified via email."
+    return render(request, 'member_register.html', {'info': info, 'form': form})
 
 def leader_login(request):
     form = LeaderLoginForm()
@@ -106,6 +129,7 @@ def leader_login(request):
                     return redirect('leader_login')
                 login(request, user)
                 request.session['type'] = 'leader'
+                request.session['is_leader'] = True
                 return redirect('leader_profile')
             else:
                 messages.error(request, 'Invalid credentials')
@@ -153,33 +177,35 @@ def leader_register(request):
             if created:
                 group.save()
             group.user_set.add(user)
-            profile = form.save(commit=False)
-            profile.user = user
+            # create leader profile
+            # convert dob to yyyy-mm-dd format from 'dd/mm/yyyy' str
+            # dob = datetime.strptime(dob, '%d/%m/%Y').strftime('%Y-%m-%d')
+            print(dob)
+            profile = LeaderProfile(user=user, 
+                                    image=image,
+                                    name=name, 
+                                    email=email, 
+                                    phone=phone, 
+                                    address=address, 
+                                    city=city, 
+                                    state=state, 
+                                    country=country, 
+                                    pincode=pincode, 
+                                    dob=dob, 
+                                    )
             profile.save()
 
             messages.success(request, 'Account created successfully')
             info = "Your account has been created successfully. Your account will be activated by the admin. You will be notified via email."
-        
-        user = User.objects.create_user(username=username, email=email, password=password)
-        user.is_active = False
-        user.save()
-        # create group if not exists
-        group, created = Group.objects.get_or_create(name='leader')
-        if created:
-            group.save()
-        group.user_set.add(user)
-
-        messages.success(request, 'Account created successfully')
-        info = "Your account has been created successfully. Your account will be activated by the admin. You will be notified via email."
     return render(request, 'leader_register.html', {'info': info, 'form': form})
 
 def logout_view(request):
     request.session.flush()
     logout(request)
-    return redirect('login')
+    return redirect('home')
 
 def member_profile(request):
-    if request.session['type'] != 'member':
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
     if not MemberProfile.objects.filter(user=user).exists():
@@ -196,7 +222,7 @@ def member_profile(request):
                                                     'discussions': discussions})
     
 def member_profile_edit(request):
-    if request.session['type'] != 'member':
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
     if request.method == 'POST':
@@ -216,7 +242,7 @@ def member_profile_edit(request):
     return render(request, 'member_profile_edit.html', {'form': form})
 
 def leader_profile(request):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     if not LeaderProfile.objects.filter(user=user).exists():
@@ -233,7 +259,7 @@ def leader_profile(request):
                                                 'discussions': discussions})
     
 def leader_profile_edit(request):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     if request.method == 'POST':
@@ -262,7 +288,7 @@ def search_club(request):
     return render(request, 'club_list.html', {'clubs': clubs})
 
 def create_club(request):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     if request.method == 'POST':
@@ -277,86 +303,123 @@ def create_club(request):
         form = ClubForm()
     return render(request, 'club_create.html', {'form': form})
 
-def edit_club(request):
-    if request.session['type'] != 'leader':
+def edit_club(request, club_id):
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
-    user = request.user
+    club = get_object_or_404(Club, pk=club_id)
+    form = ClubForm(instance=club)
     if request.method == 'POST':
-        form = ClubForm(request.POST, request.FILES)
+        form = ClubForm(request.POST, request.FILES, instance=club)
         if form.is_valid():
-            club = form.save(commit=False)
-            club.leader = user
-            club.save()
+            club = form.save()
             messages.success(request, 'Club updated successfully')
             return redirect('list_clubs')
-    else:
-        if Club.objects.filter(leader=user).exists():
-            club = Club.objects.get(leader=user)
-            form = ClubForm(instance=club)
-        else:
-            form = ClubForm()
     return render(request, 'club_edit.html', {'form': form})
-
-def remove_club(request):
-    if request.session['type'] != 'leader':
+   
+def remove_club(request, club_id):
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
-    user = request.user
-    if Club.objects.filter(leader=user).exists():
-        club = Club.objects.get(leader=user)
-        club.delete()
-        messages.success(request, 'Club removed successfully')
+    club = get_object_or_404(Club, pk=club_id)
+    club.delete()
+    messages.success(request, 'Club removed successfully')
     return redirect('list_clubs')
 
 def detail_club(request, club_id):
     club = get_object_or_404(Club, pk=club_id)
-    return render(request, 'club_detail.html', {'club': club})
+    announcements = Announcement.objects.filter(club=club)
+    events = Event.objects.filter(club=club)
+    discussions = Discussion.objects.filter(club=club)
+    return render(request, 'club_detail.html', {'club': club, 
+                'announcements': announcements, 
+                'events': events, 
+                'discussions': discussions})
 
-def apply_club(request):
-    if request.session['type'] != 'member':
+
+def apply_club(request, club_id):
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
-    club_id = request.GET['club_id']
+    # not a member
+    if not user.groups.filter(name='member').exists():
+        messages.error(request, 'You are not a member')
+        return redirect('list_clubs')
     club = get_object_or_404(Club, pk=club_id)
-    club.members.add(user)
-    messages.success(request, 'You have applied to the club')
-    return redirect('list_clubs')
+    if ClubApplication.objects.filter(user=user, club=club).exists():
+        messages.error(request, 'You have already applied to this club')
+        return redirect('list_clubs')
+    application = ClubApplication(user=user, club=club)
+    application.save()
+    messages.success(request, 'Application sent successfully')
 
-def leave_club(request):
-    if request.session['type'] != 'member':
+
+def leave_club(request, club_id):
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
-    club_id = request.GET['club_id']
     club = get_object_or_404(Club, pk=club_id)
     club.members.remove(user)
+    # remove user from all events of the club
+    try:
+        events = Event.objects.filter(club=club)
+        for event in events:
+            event.members.remove(user)
+    except Exception as e:
+        print(e)
+    # remove user from all discussions of the club
+    try:
+        discussions = Discussion.objects.filter(club=club)
+        for discussion in discussions:
+            discussion.members.remove(user)
+    except Exception as e:
+        print(e)
+    # remove user from all topics of the club
+    try:
+        topics = Topic.objects.filter(discussion__club=club)
+        for topic in topics:
+            topic.members.remove(user)
+    except Exception as e:
+        print(e)
+    # remove user from all announcements of the club
+    try:
+        announcements = Announcement.objects.filter(club=club)
+        for announcement in announcements:
+            announcement.members.remove(user)
+    except Exception as e:
+        print(e)
+    # remove user from all comments of the club
+    try:
+        comments = Comment.objects.filter(topic__discussion__club=club)
+        for comment in comments:
+            comment.members.remove(user)
+    except Exception as e:
+        print(e)    
     messages.success(request, 'You have left the club')
     return redirect('list_clubs')
 
-def accept_club(request):
-    if request.session['type'] != 'leader':
+@login_required
+def accept_club(request, caid):
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
-    user = request.user
-    club_id = request.GET['club_id']
-    member_id = request.GET['member_id']
-    club = get_object_or_404(Club, pk=club_id)
-    member = get_object_or_404(User, pk=member_id)
+    ca = get_object_or_404(ClubApplication, pk=caid)
+    club = ca.club
+    member = ca.user
     club.members.add(member)
+    ca.delete()
     messages.success(request, 'Member accepted successfully')
-    return redirect('detail_club', club_id)
+    return redirect('detail_club', club.id)
+    
 
-def reject_club(request):
-    if request.session['type'] != 'leader':
+def reject_club(request, caid):
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
-    user = request.user
-    club_id = request.GET['club_id']
-    member_id = request.GET['member_id']
-    club = get_object_or_404(Club, pk=club_id)
-    member = get_object_or_404(User, pk=member_id)
-    club.members.remove(member)
+    ca = get_object_or_404(ClubApplication, pk=caid)
+    club = ca.club
+    ca.delete()
     messages.success(request, 'Member rejected successfully')
-    return redirect('detail_club', club_id)
+    return redirect('detail_club', club.id)
 
 def create_event(request, cid):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     club = get_object_or_404(Club, pk=cid)
@@ -373,7 +436,7 @@ def create_event(request, cid):
     return render(request, 'event_create.html', {'form': form, 'club': club})
 
 def edit_event(request, eid):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     event = get_object_or_404(Event, pk=eid)
@@ -400,7 +463,7 @@ def list_events(request, cid):
     return render(request, 'event_list.html', {'events': events, 'club': club})
 
 def remove_event(request):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     event_id = request.GET['event_id']
@@ -410,7 +473,7 @@ def remove_event(request):
     return redirect('list_events', event.club.id)
 
 def join_event(request):
-    if request.session['type'] != 'member':
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
     event_id = request.GET['event_id']
@@ -420,7 +483,7 @@ def join_event(request):
     return redirect('list_events', event.club.id)
 
 def leave_event(request):
-    if request.session['type'] != 'member':
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
     event_id = request.GET['event_id']
@@ -430,7 +493,7 @@ def leave_event(request):
     return redirect('list_events', event.club.id)
 
 def create_announcement(request, cid):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     club = get_object_or_404(Club, pk=cid)
@@ -447,7 +510,7 @@ def create_announcement(request, cid):
     return render(request, 'ann_create.html', {'form': form, 'club': club})
 
 def edit_announcement(request, aid):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     announcement = get_object_or_404(Announcement, pk=aid)
@@ -466,7 +529,8 @@ def edit_announcement(request, aid):
 
 def detail_announcement(request, aid):
     announcement = get_object_or_404(Announcement, pk=aid)
-    return render(request, 'ann_detail.html', {'announcement': announcement})
+    club = announcement.club
+    return render(request, 'ann_detail.html', {'announcement': announcement, 'club': club})
 
 def list_announcements(request, cid):
     club = get_object_or_404(Club, pk=cid)
@@ -474,7 +538,7 @@ def list_announcements(request, cid):
     return render(request, 'ann_list.html', {'announcements': announcements, 'club': club})
 
 def delete_announcement(request):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     announcement_id = request.GET['announcement_id']
@@ -484,7 +548,7 @@ def delete_announcement(request):
     return redirect('list_announcements', announcement.club.id)
 
 def create_discussion(request, cid):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     club = get_object_or_404(Club, pk=cid)
@@ -501,7 +565,7 @@ def create_discussion(request, cid):
     return render(request, 'dis_create.html', {'form': form, 'club': club})
 
 def edit_discussion(request, did):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     discussion = get_object_or_404(Discussion, pk=did)
@@ -528,7 +592,7 @@ def list_discussions(request, cid):
     return render(request, 'dis_list.html', {'discussions': discussions, 'club': club})
 
 def remove_discussion(request):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     discussion_id = request.GET['discussion_id']
@@ -538,7 +602,7 @@ def remove_discussion(request):
     return redirect('list_discussions', discussion.club.id)
 
 def join_discussion(request):
-    if request.session['type'] != 'member':
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
     discussion_id = request.GET['discussion_id']
@@ -548,7 +612,7 @@ def join_discussion(request):
     return redirect('list_discussions', discussion.club.id)
 
 def leave_discussion(request):
-    if request.session['type'] != 'member':
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
     discussion_id = request.GET['discussion_id']
@@ -576,7 +640,7 @@ def about(request):
     return render(request, 'about.html')
 
 def create_topic(request, did):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     discussion = get_object_or_404(Discussion, pk=did)
@@ -594,7 +658,7 @@ def create_topic(request, did):
 
 
 def edit_topic(request, tid):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     topic = get_object_or_404(Topic, pk=tid)
@@ -622,7 +686,7 @@ def list_topics(request, did):
     return render(request, 'topic_list.html', {'topics': topics, 'discussion': discussion})
 
 def remove_topic(request):
-    if request.session['type'] != 'leader':
+    if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     topic_id = request.GET['topic_id']
@@ -632,7 +696,7 @@ def remove_topic(request):
     return redirect('list_topics', topic.discussion.id)
 
 def create_comment(request, tid):
-    if request.session['type'] != 'member':
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
     topic = get_object_or_404(Topic, pk=tid)
@@ -647,7 +711,7 @@ def create_comment(request, tid):
     return redirect('detail_topic', tid)
 
 def edit_comment(request, cid):
-    if request.session['type'] != 'member':
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
     comment = get_object_or_404(Comment, pk=cid)
@@ -663,7 +727,7 @@ def edit_comment(request, cid):
     return redirect('detail_topic', topic.id)
 
 def remove_comment(request):
-    if request.session['type'] != 'member':
+    if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
     comment_id = request.GET['comment_id']

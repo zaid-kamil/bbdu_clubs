@@ -11,6 +11,7 @@
     // CUSTOM LINK
     $('.smoothscroll').click(function(){
       var el = $(this).attr('href');
+      console.log(el);
       var elWrapped = $(el);
       var header_height = $('.navbar').height();
   

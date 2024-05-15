@@ -359,6 +359,7 @@ strong {
   NAVIGATION              
 -----------------------------------------*/
 .sticky-wrapper {
+  background-color: var(--dark-color);
   position: absolute;
   top: 0;
   right: 0;

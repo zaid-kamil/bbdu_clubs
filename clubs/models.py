@@ -65,6 +65,14 @@ class Club(models.Model):
     def __str__(self):
         return self.name
 
+class ClubApplication(models.Model):
+    club = models.ForeignKey('Club', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.status
 
 class LeaderProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -96,7 +104,7 @@ class MemberProfile(models.Model):
     pincode = models.CharField(max_length=6)
     dob = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
-    college = models.CharField(max_length=100)
+    course = models.CharField(max_length=100)
     semester = models.CharField(max_length=100)
     rollno = models.CharField(max_length=100)
     interest = models.CharField(max_length=100)

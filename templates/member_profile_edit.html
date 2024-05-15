@@ -24,7 +24,7 @@
                 <div class="tab-content shadow-lg mt-5" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-ContactForm" role="tabpanel"
                         aria-labelledby="nav-ContactForm-tab">
-                        <form class="custom-form contact-form mb-5 mb-lg-0" method="post" role="form">
+                        <form class="custom-form contact-form mb-5 mb-lg-0" method="post" role="form" enctype="multipart/form-data">
                             <div class="contact-form-body">
                                 {% csrf_token %}
                                 {{form|crispy}}
