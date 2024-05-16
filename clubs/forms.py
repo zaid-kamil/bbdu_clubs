@@ -55,7 +55,13 @@ class ClubForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ['name', 'description', 'venue']
+        fields = ['image', 'name', 'description', 'venue', 'date', 'time']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'time': forms.TimeInput(attrs={'type': 'time'}),
+            'venue': forms.TextInput(attrs={'placeholder': 'Enter the venue'}),
+            'name': forms.TextInput(attrs={'placeholder': 'Enter the name of the event'}),
+        }
         
 class AnnouncementForm(forms.ModelForm):
     class Meta:

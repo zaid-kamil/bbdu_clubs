@@ -5,6 +5,84 @@
 {% block title %}{% endblock title %}
 {% block head %}{% endblock %}
 {% block css %}{% endblock %}
-{% block content %}{% endblock %}
+{% block content %}
+<section>
+    <div class="p-5 mb-4 bg-light rounded-3">
+        <div class="container py-5">
+            <div class="d-flex justify-content-between align-items-center gap-1">
+                <div class="info">
+                    <h1 class="fs-2 fw-bold">{{ profile.name|title }}</h1>
+                    <p class="small"> <span class="fw-bold fs-3">{{ profile.email }}</span> </p>
+                    <p class="small">Birthday <span class="fw-bold"> {{ profile.dob }}</span> </p>
+                    <p class="small">Contact <span class="fw-bold"> {{ profile.phone }}</span> </p>
+                    <p class="small"><span class="fw-bold"> {{ profile.city }}</span> </p>
+                </div>
+                <div class="img">
+                    {% if profile.image %}
+                    <img src="{{ profile.image.url }}" class="img-fluid rounded-circle" alt="profile image"
+                        style="height: 150px;object-fit: contain;">
+                    {% else %}
+                    <img src="{% static 'img/default.jpg' %}" class="img-fluid rounded-circle" alt="profile image"
+                        style="height: 150px;object-fit: contain;">
+                    {% endif %}
+                </div>
+            </div>
+
+            <p class="col-md-8 fs-4">
+
+            </p>
+            <a class="btn btn-primary btn-sm" type="button" href="{% url 'member_profile_edit' %}">
+                Edit profile
+            </a>
+        </div>
+    </div>
+</section>
+<section class="artists-section " id="section_3">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 text-center">
+                <h2 class="mb-4">My clubs</h2>
+            </div>
+            {% for item in clubs %}
+            <div class="col-lg-5 col-12">
+                <div class="artists-thumb shadow-lg rounded-4">
+                    <img src="{{item.image.url}}" alt="{{item.name}}" class="artists-image img-fluid "
+                        style="height: 350px; object-fit: cover;border-radius: 1rem;">
+                    <div class="artists-hover">
+                        <p>
+                            <strong>Name:</strong>
+                            {{item.name}}
+                        </p>
+                        <p>
+                            <strong>Established</strong>
+                            {{item.created_at|naturaltime}}
+                        </p>
+                        <p>
+                            <strong>Leader</strong>
+                            {{item.leader|title}}
+                        </p>
+                        <hr>
+                        <p class="mb-0">
+                            <strong>Details:</strong>
+                            <a href="{% url 'edit_club' item.id %}" class="btn btn-dark">
+                                Click to Edit
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center my-3">
+                <h6 class="mb-4">No clubs found</h6>
+                <!-- goto club list -->
+                <a href="{% url 'list_clubs' %}" class="btn btn-primary">Join a club</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<section class="artists-section " id="section_4">
+
+</section>
+{% endblock %}
 {% block js %}{% endblock %}
-    

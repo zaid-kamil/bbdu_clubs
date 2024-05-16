@@ -32,22 +32,24 @@ urlpatterns = [
     path('club/leave/<int:club_id>/', views.leave_club, name='leave_club'),
     path('club/accept/<int:caid>/', views.accept_club, name='accept_in_club'),
     path('club/reject/<int:caid>/', views.reject_club, name='reject_in_club'),
+    path('club/remove/<int:uid>/<int:cid>/', views.remove_member, name='remove_member'),
     
     # event urls
+    path('event/list/<int:cid>/', views.list_events, name='list_events'),
+    path('event/detail/<int:eid>/', views.detail_event, name='detail_event'),
     path('event/create/<int:cid>/', views.create_event, name='create_event'),
     path('event/edit/<int:eid>/', views.edit_event, name='edit_event'),
-    path('event/detail/<int:eid>/', views.detail_event, name='detail_event'),
-    path('event/list/<int:cid>/', views.list_events, name='list_events'),
-    path('event/remove', views.remove_event, name='remove_event'),
-    path('event/join', views.join_event, name='join_event'),
-    path('event/leave', views.leave_event, name='leave_event'),
+    path('event/remove/<int:eid>/', views.remove_event, name='remove_event'),
+    path('event/join/<int:eid>/', views.join_event, name='join_event'),
+    path('event/leave/<int:eid>/', views.leave_event, name='leave_event'),
     
     # announcement urls
     path('announce/create/<int:cid>/', views.create_announcement, name='create_announcement'),
     path('announce/edit/<int:aid>/', views.edit_announcement, name='edit_announcement'),
     path('announce/detail/<int:aid>/', views.detail_announcement, name='detail_announcement'),
     path('announce/list/<int:cid>/', views.list_announcements, name='list_announcements'),
-    path('announce/delete', views.delete_announcement, name='delete_announcement'),
+    path('announce/delete/<int:aid>/', views.delete_announcement, name='remove_announcement'),
+    path('announce/like/<int:aid>/', views.like_announcement, name='like_announcement'),
     
     # discussion urls
     path('dis/create/<int:cid>/', views.create_discussion, name='create_discussion'),

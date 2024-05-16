@@ -103,18 +103,18 @@
             </div>
         </nav>
         <!-- messages -->
-        <div class="section-alert" style="    position: fixed; top: 9rem; right: 1rem;">
+        <div class="section-alert" style="position: fixed; top: 9rem; right: 1rem; z-index:99">
             <section class="alert m-0 px-3 py-1">
                 {% for message in messages %}
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
                     {{message}}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 {% endfor %}
         </div>
-        <div class="container-fluid vh-100" style="margin-top: 83px;">
+        <div class="container-fluid " style="margin-top: 83px;">
             <div class="row">
-                <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse vh-100">
+                <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse ">
                     <div class="position-sticky pt-3">
                         <ul class="nav flex-column ">
                             <li class="nav-item">
@@ -129,6 +129,13 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a href="#" class="nav-link active" aria-current="page">
+                                    <i class="bi bi-person fs-3"></i>
+                                    Requests <span
+                                        class="badge rounded-pill text-bg-dark ps-2">{{applications.count}}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="{% url 'list_announcements' club.id %}">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -136,7 +143,9 @@
                                         <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                                         <polyline points="13 2 13 9 20 9"></polyline>
                                     </svg>
-                                    Announcements
+                                    Announcements <span
+                                        class="badge rounded-pill text-bg-dark ps-2">{{announcements.count}}</span>
+
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -150,7 +159,8 @@
                                         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6">
                                         </path>
                                     </svg>
-                                    Discussions
+                                    Discussions <span
+                                        class="badge rounded-pill text-bg-dark ps-2">{{discussions.count}}</span>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -163,7 +173,7 @@
                                         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                                     </svg>
-                                    Events
+                                    Events <span class="badge rounded-pill text-bg-dark ps-2">{{events.count}}</span>
                                 </a>
                             </li>
                             <!-- faq -->
@@ -187,7 +197,7 @@
                     </div>
                 </nav>
 
-                <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4 vh-100">
+                <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                     {% block content %}{% endblock %}
                 </div>
             </div>

@@ -794,9 +794,8 @@ strong {
 -----------------------------------------*/
 .custom-form .form-control {
   color: var(--p-color);
-  margin-bottom: 24px;
-  padding-top: 13px;
-  padding-bottom: 13px;
+
+  
   outline: none;
 }
 

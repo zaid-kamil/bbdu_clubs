@@ -23,7 +23,18 @@ class Announcement(models.Model):
     
     def __str__(self):
         return self.title
+
+class LikeAnnouncement(models.Model):
+    announcement = models.ForeignKey('Announcement', on_delete=models.CASCADE, related_name='announcement')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
     
+    def __str__(self):
+        return self.user.username
+    
+
+
+
 class Discussion(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -68,11 +79,11 @@ class Club(models.Model):
 class ClubApplication(models.Model):
     club = models.ForeignKey('Club', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=100)
+    # status = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.status
+        return f'{self.user.username} applied for {self.club.name}'
 
 class LeaderProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

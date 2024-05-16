@@ -6,20 +6,17 @@
 {% block head %}{% endblock %}
 {% block css %}{% endblock %}
 {% block content %}
-<section class="contact-section section-padding bg-dark " id="section_6">
+<section class="contact-sectio bg-light " id="section_6">
     <div class="container">
         <div class="row">
             <div class="py-5"></div>
-            <div class="col-lg-5 col-12 mx-auto">
-                <h2 class="text-center mb-4 text-light">Login to BBDU clubs</h2>
+            <div class="col-10 mx-auto">
+                <h2 class="text-center mb-4 text-dark">Create new Announcement</h2>
 
-                <nav class="d-flex justify-content-center">
 
-                    <button class="btn btn-outline-dark">
-                        <h5 class="m-0 text-primary">Club Leader Login</h5>
-                    </button>
 
-                </nav>
+
+
 
                 <div class="tab-content shadow-lg mt-5" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-ContactForm" role="tabpanel"
@@ -29,7 +26,9 @@
                                 {% csrf_token %}
                                 {{form|crispy}}
                                 <div class="col-lg-4 col-md-10 col-8 mx-auto">
-                                    <button type="submit" class="form-control">Login</button>
+                                    <button type="submit" class="form-control">Create Announcement
+
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -39,7 +38,7 @@
                 </div>
             </div>
             <div class="py-5"></div>
-            
+
         </div>
     </div>
 </section>

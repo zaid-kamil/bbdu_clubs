@@ -75,6 +75,27 @@ def member_register(request):
             if password != confirm_password:
                 messages.error(request, 'Passwords do not match')
                 return redirect('register')
+            if len(phone) != 10 and not phone.isdigit():
+                messages.error(request, 'Phone number must be 10 digits')
+                return redirect('register')
+            if len(pincode) != 6:
+                messages.error(request, 'Pincode must be 6 digits')
+                return redirect('register')
+            if len(rollno) < 1:
+                messages.error(request, 'Roll number is required')
+                return redirect('register')
+            if len(interest) < 1:
+                messages.error(request, 'Interest is required')
+                return redirect('register')
+            if len(course) < 1:
+                messages.error(request, 'Course is required')
+                return redirect('register')
+            if len(semester) < 1:
+                messages.error(request, 'Semester is required')
+                return redirect('register')
+            if len(dob) < 1:
+                messages.error(request, 'Date of birth is required')
+                return redirect('register')
             
             user = User.objects.create_user(username=username, email=email, password=password)
             user.is_active = False
@@ -168,6 +189,37 @@ def leader_register(request):
             if password != confirm_password:
                 messages.error(request, 'Passwords do not match')
                 return redirect('leader_register')
+            if len(phone) != 10 and not phone.isdigit():
+                messages.error(request, 'Phone number must be 10 digits')
+                return redirect('leader_register')
+            if len(pincode) != 6:
+                messages.error(request, 'Pincode must be 6 digits')
+                return redirect('leader_register')
+            if len(dob) < 1:
+                messages.error(request, 'Date of birth is required')
+                return redirect('leader_register')
+            if len(name) < 1:
+                messages.error(request, 'Name is required')
+                return redirect('leader_register')
+            if len(address) < 1:
+                messages.error(request, 'Address is required')
+                return redirect('leader_register')
+            if len(city) < 1:
+                messages.error(request, 'City is required')
+                return redirect('leader_register')
+            if len(state) < 1:
+                messages.error(request, 'State is required')
+                return redirect('leader_register')
+            if len(country) < 1:
+                messages.error(request, 'Country is required')
+                return redirect('leader_register')
+            if len(pincode) < 1:
+                messages.error(request, 'Pincode is required')
+                return redirect('leader_register')
+            if len(dob) < 1:
+                messages.error(request, 'Date of birth is required')
+                return redirect('leader_register')
+
             
             user = User.objects.create_user(username=username, email=email, password=password)
             user.is_active = False
@@ -204,6 +256,7 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
+@login_required
 def member_profile(request):
     if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
@@ -221,26 +274,22 @@ def member_profile(request):
                                                    'events': events,
                                                     'discussions': discussions})
     
+@login_required
 def member_profile_edit(request):
     if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
+    profile = MemberProfile.objects.get(user=user)
+    form = MemberProfileForm(instance=profile)
     if request.method == 'POST':
-        form = MemberProfileForm(request.POST, request.FILES)
+        form = MemberProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            profile = form.save(commit=False)
-            profile.user = user
-            profile.save()
+            profile = form.save()
             messages.success(request, 'Profile updated successfully')
             return redirect('member_profile')
-    else:
-        if MemberProfile.objects.filter(user=user).exists():
-            profile = MemberProfile.objects.get(user=user)
-            form = MemberProfileForm(instance=profile)
-        else:
-            form = MemberProfileForm()
     return render(request, 'member_profile_edit.html', {'form': form})
 
+@login_required
 def leader_profile(request):
     if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
@@ -257,7 +306,8 @@ def leader_profile(request):
                                                 'announcements': announcements, 
                                                 'events': events,
                                                 'discussions': discussions})
-    
+
+@login_required    
 def leader_profile_edit(request):
     if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
@@ -287,6 +337,7 @@ def search_club(request):
     clubs = Club.objects.filter(name__icontains=query)
     return render(request, 'club_list.html', {'clubs': clubs})
 
+@login_required
 def create_club(request):
     if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
@@ -303,6 +354,7 @@ def create_club(request):
         form = ClubForm()
     return render(request, 'club_create.html', {'form': form})
 
+@login_required
 def edit_club(request, club_id):
     if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
@@ -313,9 +365,10 @@ def edit_club(request, club_id):
         if form.is_valid():
             club = form.save()
             messages.success(request, 'Club updated successfully')
-            return redirect('list_clubs')
+            return redirect('detail_club', club.id)
     return render(request, 'club_edit.html', {'form': form})
    
+@login_required
 def remove_club(request, club_id):
     if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
@@ -329,12 +382,28 @@ def detail_club(request, club_id):
     announcements = Announcement.objects.filter(club=club)
     events = Event.objects.filter(club=club)
     discussions = Discussion.objects.filter(club=club)
+    applications = ClubApplication.objects.filter(club=club)
+    for a in applications:
+        if MemberProfile.objects.filter(user=a.user).exists():        
+            a.profile = MemberProfile.objects.get(user=a.user)
+        else:
+            a.profile = None
+    members = club.members.all()
+    for member in members:
+        if MemberProfile.objects.filter(user=member).exists():
+            member.profile = MemberProfile.objects.get(user=member)
+        else:
+            member.profile = None
+    print(f'announcements: {announcements}')
     return render(request, 'club_detail.html', {'club': club, 
                 'announcements': announcements, 
                 'events': events, 
-                'discussions': discussions})
+                'discussions': discussions,
+                'applications': applications,
+                'members': members
+                })
 
-
+@login_required
 def apply_club(request, club_id):
     if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
@@ -350,7 +419,7 @@ def apply_club(request, club_id):
     application = ClubApplication(user=user, club=club)
     application.save()
     messages.success(request, 'Application sent successfully')
-
+    return redirect('list_clubs')
 
 def leave_club(request, club_id):
     if 'type' in request.session and request.session.get('type') != 'member':
@@ -408,7 +477,7 @@ def accept_club(request, caid):
     messages.success(request, 'Member accepted successfully')
     return redirect('detail_club', club.id)
     
-
+@login_required
 def reject_club(request, caid):
     if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
@@ -418,13 +487,59 @@ def reject_club(request, caid):
     messages.success(request, 'Member rejected successfully')
     return redirect('detail_club', club.id)
 
+@login_required
+def remove_member(request, uid, cid):
+    if 'type' in request.session and request.session.get('type') != 'leader':
+        return redirect('leader_login')
+    user = get_object_or_404(User, pk=uid)
+    club = get_object_or_404(Club, pk=cid)
+    club.members.remove(user)
+    # remove user from all events of the club
+    try:
+        events = Event.objects.filter(club=club)
+        for event in events:
+            event.members.remove(user)
+    except Exception as e:
+        print(e)
+    # remove user from all discussions of the club
+    try:
+        discussions = Discussion.objects.filter(club=club)
+        for discussion in discussions:
+            discussion.members.remove(user)
+    except Exception as e:
+        print(e)
+    # remove user from all topics of the club
+    try:
+        topics = Topic.objects.filter(discussion__club=club)
+        for topic in topics:
+            topic.members.remove(user)
+    except Exception as e:
+        print(e)
+    # remove user from all announcements of the club
+    try:
+        announcements = Announcement.objects.filter(club=club)
+        for announcement in announcements:
+            announcement.members.remove(user)
+    except Exception as e:
+        print(e)
+    # remove user from all comments of the club
+    try:
+        comments = Comment.objects.filter(topic__discussion__club=club)
+        for comment in comments:
+            comment.members.remove(user)
+    except Exception as e:
+        print(e)    
+    messages.success(request, 'Member removed successfully')
+    return redirect('detail_club', club.id)
+
+@login_required
 def create_event(request, cid):
     if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
     club = get_object_or_404(Club, pk=cid)
     if request.method == 'POST':
-        form = EventForm(request.POST)
+        form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             event = form.save(commit=False)
             event.club = club
@@ -442,7 +557,7 @@ def edit_event(request, eid):
     event = get_object_or_404(Event, pk=eid)
     club = event.club
     if request.method == 'POST':
-        form = EventForm(request.POST)
+        form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             event = form.save(commit=False)
             event.club = club
@@ -455,39 +570,45 @@ def edit_event(request, eid):
 
 def detail_event(request, eid):
     event = get_object_or_404(Event, pk=eid)
-    return render(request, 'event_detail.html', {'event': event})
+    attendees = event.attendees.all()
+    for attendee in attendees:
+        if MemberProfile.objects.filter(user=attendee).exists():
+            attendee.profile = MemberProfile.objects.get(user=attendee)
+        else:
+            attendee.profile = None
+    return render(request, 'event_detail.html', {'event': event, 'attendees': attendees})
 
 def list_events(request, cid):
     club = get_object_or_404(Club, pk=cid)
     events = Event.objects.filter(club=club)
     return render(request, 'event_list.html', {'events': events, 'club': club})
 
-def remove_event(request):
+def remove_event(request, eid):
     if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
-    event_id = request.GET['event_id']
-    event = get_object_or_404(Event, pk=event_id)
+    event = get_object_or_404(Event, pk=eid)
     event.delete()
     messages.success(request, 'Event removed successfully')
     return redirect('list_events', event.club.id)
 
-def join_event(request):
+def join_event(request,eid):
     if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
-    event_id = request.GET['event_id']
-    event = get_object_or_404(Event, pk=event_id)
+    event = get_object_or_404(Event, pk=eid)
+    if event.members.filter(id=user.id).exists():
+        messages.error(request, 'You have already joined this event')
+        return redirect('list_events', event.club.id)
     event.members.add(user)
     messages.success(request, 'You have joined the event')
-    return redirect('list_events', event.club.id)
+    return redirect('detail_event', eid)
 
-def leave_event(request):
+def leave_event(request, eid):
     if 'type' in request.session and request.session.get('type') != 'member':
         return redirect('login')
     user = request.user
-    event_id = request.GET['event_id']
-    event = get_object_or_404(Event, pk=event_id)
+    event = get_object_or_404(Event, pk=eid)
     event.members.remove(user)
     messages.success(request, 'You have left the event')
     return redirect('list_events', event.club.id)
@@ -530,11 +651,14 @@ def edit_announcement(request, aid):
 def detail_announcement(request, aid):
     announcement = get_object_or_404(Announcement, pk=aid)
     club = announcement.club
-    return render(request, 'ann_detail.html', {'announcement': announcement, 'club': club})
+    likes = LikeAnnouncement.objects.filter(announcement=announcement)
+    print(f'likes: {likes} and count: {likes.count()}')
+    return render(request, 'ann_detail.html', {'announcement': announcement, 'club': club, 'likes': likes, 'like_count': likes.count()})
 
 def list_announcements(request, cid):
     club = get_object_or_404(Club, pk=cid)
     announcements = Announcement.objects.filter(club=club)
+    
     return render(request, 'ann_list.html', {'announcements': announcements, 'club': club})
 
 def delete_announcement(request):
@@ -546,6 +670,20 @@ def delete_announcement(request):
     announcement.delete()
     messages.success(request, 'Announcement removed successfully')
     return redirect('list_announcements', announcement.club.id)
+
+from .models import LikeAnnouncement
+def like_announcement(request, aid):
+    if 'type' in request.session and request.session.get('type') != 'member':
+        return redirect('login')
+    user = request.user
+    announcement = get_object_or_404(Announcement, pk=aid)
+    if LikeAnnouncement.objects.filter(announcement=announcement, user=user).exists():
+        messages.error(request, 'You have already liked this announcement')
+        return redirect('detail_announcement', aid)
+    like = LikeAnnouncement(announcement=announcement, user=user)
+    like.save()
+    messages.success(request, 'You have liked the announcement')
+    return redirect('detail_announcement', aid)
 
 def create_discussion(request, cid):
     if 'type' in request.session and request.session.get('type') != 'leader':

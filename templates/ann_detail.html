@@ -5,6 +5,86 @@
 {% block title %}{% endblock title %}
 {% block head %}{% endblock %}
 {% block css %}{% endblock %}
-{% block content %}{% endblock %}
+{% block content %}
+<!-- About 7 - Bootstrap Brain Component -->
+<section class="py-3 py-md-5 py-xl-8">
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-12 ">
+                <h2 class="mb-4 display-5 text-center">{{announcement.title}} </h2>
+                <p class="text-secondary mb-5 text-center lead fs-4">
+                    {{announcement.created_at|naturaltime}}
+                </p>
+                <hr class="w-50 mx-auto mb-5 mb-xl-9 border-dark-subtle">
+                {{announcement.club.name}}
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row gy-4 gy-lg-0 align-items-lg-center">
+            <div class="col-12 col-lg-6">
+                <img class="img-fluid rounded border border-dark" loading="lazy" src="{{announcement.club.image.url}}"
+                    alt="About Us">
+            </div>
+            <div class="col-12 col-lg-6 col-xxl-6">
+                <div class="row justify-content-lg-end">
+                    <div class="col-12 col-lg-11">
+                        <div class="about-wrapper">
+                            <p class="lead mb-4 mb-md-5">
+                                {{announcement.description|safe|linebreaks}}
+                            </p>
+                            <div class="row gy-4 mb-4 mb-md-5">
+                                <div class="col-12 col-md-6">
+                                    <div class="card border border-dark">
+                                        <div class="card-body p-4">
+                                            <h3 class="display-5 fw-bold text-primary text-center mb-2">
+                                                <i class="bi bi-heart"></i>
+                                                {{like_count}}
+                                            </h3>
+                                            </h3>
+                                            <p class="fw-bold text-center m-0">
+                                                Likes
+                                            </p>
+                                        </div>
+                                        <a href="{% url 'like_announcement' announcement.id %}"
+                                            class="btn btn-primary bsb-btn-2xl">
+                                            Give it a like <i class="bi bi-heart"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- actions based of user -->
+        <div class="row gy-4 mb-4 mb-md-5">
+            <div class="col-12">
+                <div class="card border-0 ">
+                    <div class="d-flex gap-2">
+                        {% if user.is_authenticated %}
+                        {% if user == announcement.club.leader %}
+                        <a href="{% url 'edit_announcement' announcement.id %}"
+                            class="btn btn-primary bsb-btn-2xl">Update</a>
+                        <a href="{% url 'remove_announcement' announcement.id %}"
+                            class="btn btn-danger bsb-btn-2xl">Delete</a>
+                        {% endif %}
+                       
+                        {% endif %}
+                        <!-- back -->
+                        <a href="{% url 'detail_club' announcement.club.id %}" class="btn btn-dark bsb-btn-2xl">Back
+                            to
+                            Club</a>
+                        <!-- back to ann -->
+                        <a href="{% url 'list_announcements' announcement.club.id %}" class="btn btn-dark bsb-btn-2xl">Back to
+                            Announcements</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
 {% block js %}{% endblock %}
-    

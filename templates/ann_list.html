@@ -5,6 +5,94 @@
 {% block title %}{% endblock title %}
 {% block head %}{% endblock %}
 {% block css %}{% endblock %}
-{% block content %}{% endblock %}
+{% block content %}
+<!-- Service 9 - Bootstrap Brain Component -->
+<section class="bg-light py-3 py-md-5 py-xl-8">
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-12 ">
+                <h2 class="mb-4 display-5 text-center">
+                    {{club.name}}
+                </h2>
+                <p class="text-secondary mb-5 text-center lead fs-4">
+                    {{club.description|truncatewords:30}}
+                </p>
+                <hr class="w-50 mx-auto mb-5 mb-xl-9 border-dark-subtle">
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="container-fluid">
+                    <div class="row gy-3 gy-md-4">
+                        {% for item in announcements %}
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card border-dark">
+                                <div class="card-body text-center p-4 p-xxl-5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor"
+                                        class="bi bi-front text-primary mb-4" viewBox="0 0 16 16">
+                                        <path
+                                            d="M0 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2H2a2 2 0 0 1-2-2zm5 10v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2v5a2 2 0 0 1-2 2z" />
+                                    </svg>
+                                    <h6 class="mb-4">
+                                        <marquee behavior="scroll" direction="left">{{item.title}}</marquee>
+                                    </h6>
+                                    <p class="mb-4 text-secondary">
+                                        {{item.description|truncatewords:5}}...
+                                        <a href="{% url 'detail_announcement' item.id %}" class="text-primary">
+                                            <br>Read
+                                            more</a>
+                                    </p>
+                                    <a href="{% url 'detail_announcement' item.id %}"
+                                        class="btn btn-outline-primary bsb-btn-circle">
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="me-3">
+                                            <img src="{{club.leader.leaderprofile.image.url}}" alt="avatar"
+                                                class="avatar avatar-sm rounded-circle" style="width: 40px;">
+                                        </div>
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <span class="text-dark">{{item.author}}</span>
+                                            <span class="text-secondary">{{item.created_at|naturaltime}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if user.is_authenticated %}
+                        {% if user == club.leader %}
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card border-dark">
+                                <div class="card-body text-center p-4 p-xxl-5">
+                                    <i class="bi bi-plus-circle text-primary mb-4 display-5"></i>
+                                    <h4 class="mb-4">
+                                        <a href="{% url 'create_announcement' club.id %}" class="text-dark">
+                                            Create Announcement
+                                        </a>
+                                    </h4>
+                                    <p class="mb-4 text-secondary">
+                                        Create a new announcement for your club.
+                                    </p>
+                                    <a href="{% url 'create_announcement' club.id %}"
+                                        class="btn btn-outline-success bsb-btn-circle">
+                                        Create Announcement <i class="bi bi-arrow-right"></i> 
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
 {% block js %}{% endblock %}
-    
