@@ -36,6 +36,7 @@ class LikeAnnouncement(models.Model):
 
 
 class Discussion(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, default=1)  
     name = models.CharField(max_length=100)
     description = models.TextField()
     club = models.ForeignKey('Club', on_delete=models.CASCADE)
@@ -46,6 +47,7 @@ class Discussion(models.Model):
         return self.name
     
 class Topic(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, default=1) 
     name = models.CharField(max_length=100)
     description = models.TextField()
     discussion = models.ForeignKey('Discussion', on_delete=models.CASCADE)
@@ -55,7 +57,9 @@ class Topic(models.Model):
         return self.name
     
 class Comment(models.Model):
-    text = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    text = models.TextField(null=True, blank=True)
+    image = models.ImageField(upload_to='comment_images/', null=True, blank=True)
     topic = models.ForeignKey('Topic', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     

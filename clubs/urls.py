@@ -52,25 +52,23 @@ urlpatterns = [
     path('announce/like/<int:aid>/', views.like_announcement, name='like_announcement'),
     
     # discussion urls
+    path('dis/list/<int:cid>/', views.list_discussions, name='list_discussions'),
     path('dis/create/<int:cid>/', views.create_discussion, name='create_discussion'),
     path('dis/edit/<int:did>/', views.edit_discussion, name='edit_discussion'),
     path('dis/detail/<int:did>/', views.detail_discussion, name='detail_discussion'),
-    path('dis/list/<int:cid>/', views.list_discussions, name='list_discussions'),
-    path('dis/remove', views.remove_discussion, name='remove_discussion'),
-    path('dis/join', views.join_discussion, name='join_discussion'),
-    path('dis/leave', views.leave_discussion, name='leave_discussion'),
+    path('dis/remove/<int:did>/', views.remove_discussion, name='remove_discussion'),
     
     # topic urls
     path('topic/create/<int:did>/', views.create_topic, name='create_topic'),
     path('topic/edit/<int:tid>/', views.edit_topic, name='edit_topic'),
     path('topic/detail/<int:tid>/', views.detail_topic, name='detail_topic'),
     path('topic/list/<int:did>/', views.list_topics, name='list_topics'),
-    path('topic/remove', views.remove_topic, name='remove_topic'),
+    path('topic/remove/<int:tid>/', views.remove_topic, name='remove_topic'),
     
     # comment urls
     path('comment/create/<int:tid>/', views.create_comment, name='create_comment'),
     path('comment/edit/<int:cid>/', views.edit_comment, name='edit_comment'),
-    path('comment/remove', views.remove_comment, name='remove_comment'),
+    path('comment/remove/<int:cid>/', views.remove_comment, name='remove_comment'),
     
     # communications
     path('contact/', views.contact, name='contact'),

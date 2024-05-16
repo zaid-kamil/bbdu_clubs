@@ -4,7 +4,113 @@
 {% load crispy_forms_tags %}
 {% block title %}{% endblock title %}
 {% block head %}{% endblock %}
-{% block css %}{% endblock %}
-{% block content %}{% endblock %}
+{% block css %}
+<style>
+    #div_id_text {
+        margin-bottom: 0 !important;
+    }
+
+    label.form-label {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<!-- About 7 - Bootstrap Brain Component -->
+<section class="py-3 py-md-5 py-xl-8">
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-12 ">
+                <h2 class="mb-2 display-5 text-center">{{topic.name}} </h2>
+                <p class="text-secondary mb-2 lead fs-4 text-center">
+                    {{topic.description|safe}}
+                </p>
+                <p class="text-secondary mb-2 text-center lead fs-4">
+                    {{topic.created_at|naturaltime}}
+                </p>
+
+                <hr class="w-50 mx-auto mb-5 mb-xl-9 border-dark-subtle">
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- attedees -->
+        <div class="row gy-4 mb-4 mb-md-5">
+            <div class="col-12">
+                <div class="card">
+                    <iv class="card-body">
+                        <h4 class="card-title">topic comments</h4>
+                        <p class="card-text">
+                            {{comments|length}} comments
+                        </p>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item py-5">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <form method="post" action="{% url 'create_comment' topic.id %}"
+                                class=" d-flex justify-content-center align-items-center gap-2 w-100">
+                                <i class="bi bi-person-circle"></i>
+                                <div class="d-flex gap-2 align-items-center">
+                                    {{form|crispy}}
+                                    {% csrf_token %}
+                                </div>
+                                <button type="submit" class="btn btn-primary bsb-btn-2xl">Add comment</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% for item in comments %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex gap-2 align-items-center justify-content-between w-100">
+                                <div class="d-flex gap-3">
+                                    <i class="bi bi-person-circle"></i>
+                                    <p class="bg-light text-dark px-2 my-0">{{item.author}}</p>
+                                    <p class="lead m-0">{{item.text}}</p>
+                                </div>
+                                <p class="fs-7 my-0">
+                                    <i class="bi bi-clock fs-7"></i>
+                                    {{item.created_at|naturaltime}}
+                                </p>
+                            </div>
+                        </div>
+                    </li>
+
+                    {% endfor %}
+                    <!-- add new comment -->
+                    
+                </ul>
+            </div>
+
+        </div>
+    </div>
+    <!-- actions based of user -->
+    <div class="container">
+        <div class="row gy-4 mb-4 mb-md-5">
+            <div class="col-12">
+                <div class="card border-0 ">
+                    <div class="d-flex gap-2">
+                        {% if user == topic.author %}
+
+                        <a href="{% url 'edit_topic' topic.id %}" class="btn btn-primary bsb-btn-2xl">Update Topic</a>
+                        <a href="{% url 'remove_topic' topic.id %}" class="btn btn-danger bsb-btn-2xl">Delete Topic</a>
+                        {% endif %}
+
+
+                        <!-- back -->
+                        <a href="{% url 'detail_club' topic.discussion.club.id %}" class="btn btn-dark bsb-btn-2xl">Back
+                            to
+                            Club</a>
+                        <!-- back to ann -->
+                        <a href="{% url 'list_topics' topic.discussion.club.id %}" class="btn btn-dark bsb-btn-2xl">Back
+                            to
+                            topics</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+{% endblock %}
 {% block js %}{% endblock %}
-    

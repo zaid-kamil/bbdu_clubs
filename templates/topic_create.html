@@ -6,32 +6,95 @@
 {% block head %}{% endblock %}
 {% block css %}{% endblock %}
 {% block content %}
-<section class="contact-section section-padding bg-dark " id="section_6">
+<!-- About 7 - Bootstrap Brain Component -->
+<section class="py-3 py-md-5 py-xl-8">
     <div class="container">
-        <div class="row">
-            <div class="py-5"></div>
-            <div class="col-lg-5 col-12 mx-auto">
-                <h2 class="text-center mb-4 text-light">Create a new topic</h2>
-                <div class="tab-content shadow-lg mt-5" id="nav-tabContent">
-                    <div class="tab-pane fade show active" id="nav-ContactForm" role="tabpanel"
-                        aria-labelledby="nav-ContactForm-tab">
-                        <form class="custom-form contact-form mb-5 mb-lg-0" method="post" role="form"
-                            enctype="multipart/form-data">
-                            <div class="contact-form-body">
-                                {% csrf_token %}
-                                {{form|crispy}}
-                                <div class="col-lg-4 col-md-10 col-8 mx-auto">
-                                    <button type="submit" class="form-control">Add topic</button>
-                                </div>
-                            </div>
-                        </form>
+        <div class="row justify-content-md-center">
+            <div class="col-12 ">
+                <h2 class="mb-2 display-5 text-center">{{discussion.name}} </h2>
+                <p class="text-secondary mb-2 lead fs-4 text-center">
+                    {{discussion.description|safe}}
+                </p>
+                <p class="text-secondary mb-2 text-center lead fs-4">
+                    {{discussion.created_at|naturaltime}}
+                </p>
+
+                <hr class="w-50 mx-auto mb-5 mb-xl-9 border-dark-subtle">
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- attedees -->
+        <div class="row gy-4 mb-4 mb-md-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Discussion Topics</h4>
+                        <p class="card-text">
+                            {{topics|length}} topics
+                        </p>
                     </div>
+                    <ul class="list-group list-group-flush">
+                        {% for item in topics %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex gap-2 align-items-center">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span>{{item.name}}</span>
+                                    <!-- comment count -->
 
+                                </div>
+                                <a href="{% url 'detail_topic' item.id %}" class="btn btn-primary bsb-btn-2xl">
+                                    View Topic</a>
+                            </div>
+                            <span class="badge bg-primary px-2">{{item.comment_count}} comment(s)</span>
+                        </li>
 
+                        {% endfor %}
+                        <!-- add new topic -->
+                        <li class="list-group-item bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex gap-2 align-items-center">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span>Add Topic</span>
+                                </div>
+                                <a href="{% url 'create_topic' discussion.id %}" class="btn btn-primary bsb-btn-2xl">
+                                    Add
+                                    Topic <i class="bi bi-plus"></i>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+        <!-- actions based of user -->
+        <div class="row gy-4 mb-4 mb-md-5">
+            <div class="col-12">
+                <div class="card border-0 ">
+                    <div class="d-flex gap-2">
+                        {% if user.is_authenticated %}
+                        {% if user == discussion.author %}
+                        <a href="{% url 'edit_discussion' discussion.id %}"
+                            class="btn btn-primary bsb-btn-2xl">Update</a>
+                        <a href="{% url 'remove_discussion' discussion.id %}"
+                            class="btn btn-danger bsb-btn-2xl">Delete</a>
+                        {% endif %}
+
+                        {% endif %}
+                        <!-- back -->
+                        <a href="{% url 'detail_club' discussion.club.id %}" class="btn btn-dark bsb-btn-2xl">Back
+                            to
+                            Club</a>
+                        <!-- back to ann -->
+                        <a href="{% url 'list_discussions' discussion.club.id %}" class="btn btn-dark bsb-btn-2xl">Back
+                            to
+                            discussions</a>
+                    </div>
                 </div>
             </div>
-            <div class="py-5"></div>
-
         </div>
     </div>
 </section>

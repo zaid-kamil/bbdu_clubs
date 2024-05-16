@@ -82,6 +82,10 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['text']
+        widgets = {
+            # remove the label
+            'text': forms.Textarea(attrs={'placeholder': 'Enter your comment here', 'rows': 1, 'cols': 50}),
+        }
         
 class LeaderProfileForm(forms.ModelForm):
     class Meta:

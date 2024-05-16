@@ -5,6 +5,21 @@
 {% block title %}{% endblock title %}
 {% block head %}{% endblock %}
 {% block css %}{% endblock %}
-{% block content %}{% endblock %}
+{% block content %}
+<section class="section-padding">
+    <!--  -->
+    <div class="p-5 mb-4 bg-light rounded-3">
+        <div class="container-fluid py-5">
+            <h1 class="display-5 fw-bold">Topics</h1>
+            <p class="col-md-8 fs-4">
+
+            </p>
+            <a class="btn btn-primary btn-lg" type="button" href="{% url 'create_topic' discussion.id %}">
+                Back to Discussions
+            </a>
+        </div>
+    </div>
+
+</section>
+{% endblock %}
 {% block js %}{% endblock %}
-    

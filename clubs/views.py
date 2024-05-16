@@ -661,12 +661,11 @@ def list_announcements(request, cid):
     
     return render(request, 'ann_list.html', {'announcements': announcements, 'club': club})
 
-def delete_announcement(request):
+def delete_announcement(request, aid):
     if 'type' in request.session and request.session.get('type') != 'leader':
         return redirect('leader_login')
     user = request.user
-    announcement_id = request.GET['announcement_id']
-    announcement = get_object_or_404(Announcement, pk=announcement_id)
+    announcement = get_object_or_404(Announcement, pk=aid)
     announcement.delete()
     messages.success(request, 'Announcement removed successfully')
     return redirect('list_announcements', announcement.club.id)
@@ -685,9 +684,8 @@ def like_announcement(request, aid):
     messages.success(request, 'You have liked the announcement')
     return redirect('detail_announcement', aid)
 
+@login_required
 def create_discussion(request, cid):
-    if 'type' in request.session and request.session.get('type') != 'leader':
-        return redirect('leader_login')
     user = request.user
     club = get_object_or_404(Club, pk=cid)
     if request.method == 'POST':
@@ -695,6 +693,7 @@ def create_discussion(request, cid):
         if form.is_valid():
             discussion = form.save(commit=False)
             discussion.club = club
+            discussion.author = user
             discussion.save()
             messages.success(request, 'Discussion created successfully')
             return redirect('list_discussions', cid)
@@ -702,11 +701,13 @@ def create_discussion(request, cid):
         form = DiscussionForm()
     return render(request, 'dis_create.html', {'form': form, 'club': club})
 
+@login_required
 def edit_discussion(request, did):
-    if 'type' in request.session and request.session.get('type') != 'leader':
-        return redirect('leader_login')
-    user = request.user
+    # if discussion is created by current user
     discussion = get_object_or_404(Discussion, pk=did)
+    if discussion.author != request.user:
+        messages.error(request, 'You are not allowed to edit this discussion')
+        return redirect('list_discussions', discussion.club.id)
     club = discussion.club
     if request.method == 'POST':
         form = DiscussionForm(request.POST)
@@ -720,14 +721,23 @@ def edit_discussion(request, did):
         form = DiscussionForm(instance=discussion)
     return render(request, 'dis_edit.html', {'form': form, 'club': club})
 
+@login_required
 def detail_discussion(request, did):
     discussion = get_object_or_404(Discussion, pk=did)
-    return render(request, 'dis_detail.html', {'discussion': discussion})
+    topics = Topic.objects.filter(discussion=discussion)
+    for topic in topics:
+        topic.comment_count = Comment.objects.filter(topic=topic).count()
+    return render(request, 'dis_detail.html', {'discussion': discussion, 'topics': topics})
 
+
+@login_required
 def list_discussions(request, cid):
     club = get_object_or_404(Club, pk=cid)
     discussions = Discussion.objects.filter(club=club)
-    return render(request, 'dis_list.html', {'discussions': discussions, 'club': club})
+    topics = Topic.objects.filter(discussion__club=club)
+    for topic in topics:
+        topic.comment_count = Comment.objects.filter(topic=topic).count()
+    return render(request, 'dis_list.html', {'discussions': discussions, 'club': club, 'topics': topics})
 
 def remove_discussion(request):
     if 'type' in request.session and request.session.get('type') != 'leader':
@@ -739,25 +749,6 @@ def remove_discussion(request):
     messages.success(request, 'Discussion removed successfully')
     return redirect('list_discussions', discussion.club.id)
 
-def join_discussion(request):
-    if 'type' in request.session and request.session.get('type') != 'member':
-        return redirect('login')
-    user = request.user
-    discussion_id = request.GET['discussion_id']
-    discussion = get_object_or_404(Discussion, pk=discussion_id)
-    discussion.members.add(user)
-    messages.success(request, 'You have joined the discussion')
-    return redirect('list_discussions', discussion.club.id)
-
-def leave_discussion(request):
-    if 'type' in request.session and request.session.get('type') != 'member':
-        return redirect('login')
-    user = request.user
-    discussion_id = request.GET['discussion_id']
-    discussion = get_object_or_404(Discussion, pk=discussion_id)
-    discussion.members.remove(user)
-    messages.success(request, 'You have left the discussion')
-    return redirect('list_discussions', discussion.club.id)
 
 def faq(request):
     faqs = Faq.objects.all()
@@ -778,8 +769,6 @@ def about(request):
     return render(request, 'about.html')
 
 def create_topic(request, did):
-    if 'type' in request.session and request.session.get('type') != 'leader':
-        return redirect('leader_login')
     user = request.user
     discussion = get_object_or_404(Discussion, pk=did)
     if request.method == 'POST':
@@ -787,6 +776,7 @@ def create_topic(request, did):
         if form.is_valid():
             topic = form.save(commit=False)
             topic.discussion = discussion
+            topic.author = user
             topic.save()
             messages.success(request, 'Topic created successfully')
             return redirect('list_topics', did)
@@ -796,13 +786,11 @@ def create_topic(request, did):
 
 
 def edit_topic(request, tid):
-    if 'type' in request.session and request.session.get('type') != 'leader':
-        return redirect('leader_login')
     user = request.user
     topic = get_object_or_404(Topic, pk=tid)
     discussion = topic.discussion
     if request.method == 'POST':
-        form = TopicForm(request.POST)
+        form = TopicForm(request.POST, instance=topic)
         if form.is_valid():
             topic = form.save(commit=False)
             topic.discussion = discussion
@@ -816,26 +804,29 @@ def edit_topic(request, tid):
 def detail_topic(request, tid):
     topic = get_object_or_404(Topic, pk=tid)
     comments = Comment.objects.filter(topic=topic)
-    return render(request, 'topic_detail.html', {'topic': topic, 'comments': comments})
+    form = CommentForm()
+    
+    return render(request, 'topic_detail.html', {
+        'topic': topic, 
+        'form': form,
+        'comments': comments})
 
 def list_topics(request, did):
     discussion = get_object_or_404(Discussion, pk=did)
     topics = Topic.objects.filter(discussion=discussion)
     return render(request, 'topic_list.html', {'topics': topics, 'discussion': discussion})
 
-def remove_topic(request):
-    if 'type' in request.session and request.session.get('type') != 'leader':
-        return redirect('leader_login')
+def remove_topic(request, tid):
     user = request.user
-    topic_id = request.GET['topic_id']
-    topic = get_object_or_404(Topic, pk=topic_id)
+    topic = get_object_or_404(Topic, pk=tid)
+    if topic.author != user:
+        messages.error(request, 'You are not allowed to delete this topic')
+        return redirect('list_topics', topic.discussion.id)
     topic.delete()
     messages.success(request, 'Topic removed successfully')
     return redirect('list_topics', topic.discussion.id)
 
 def create_comment(request, tid):
-    if 'type' in request.session and request.session.get('type') != 'member':
-        return redirect('login')
     user = request.user
     topic = get_object_or_404(Topic, pk=tid)
     if request.method == 'POST':
@@ -843,14 +834,13 @@ def create_comment(request, tid):
         if form.is_valid():
             comment = form.save(commit=False)
             comment.topic = topic
-            comment.user = user
+            comment.author = user
             comment.save()
             messages.success(request, 'Comment created successfully')
     return redirect('detail_topic', tid)
 
 def edit_comment(request, cid):
-    if 'type' in request.session and request.session.get('type') != 'member':
-        return redirect('login')
+   
     user = request.user
     comment = get_object_or_404(Comment, pk=cid)
     topic = comment.topic
@@ -859,17 +849,17 @@ def edit_comment(request, cid):
         if form.is_valid():
             comment = form.save(commit=False)
             comment.topic = topic
-            comment.user = user
+            comment.author = user
             comment.save()
             messages.success(request, 'Comment updated successfully')
     return redirect('detail_topic', topic.id)
 
-def remove_comment(request):
-    if 'type' in request.session and request.session.get('type') != 'member':
-        return redirect('login')
+def remove_comment(request, cid):
     user = request.user
-    comment_id = request.GET['comment_id']
-    comment = get_object_or_404(Comment, pk=comment_id)
+    comment = get_object_or_404(Comment, pk=cid)
+    if comment.author != user:
+        messages.error(request, 'You are not allowed to delete this comment')
+        return redirect('detail_topic', comment.topic.id)
     comment.delete()
     messages.success(request, 'Comment removed successfully')
     return redirect('detail_topic', comment.topic.id)
