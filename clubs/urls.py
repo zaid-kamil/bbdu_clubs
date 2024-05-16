@@ -9,7 +9,7 @@ urlpatterns = [
     
     # leader auth
     path("leader/login", views.leader_login, name="leader_login"),
-    path("leader/register", views.leader_register, name="register"),
+    path("leader/register", views.leader_register, name="leader_register"),
     
     # logout
     path('logout', views.logout_view, name='logout'),
